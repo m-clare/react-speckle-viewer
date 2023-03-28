@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Viewer } from "@speckle/viewer";
+import { Viewer, DefaultViewerParams, ViewerEvent } from "@speckle/viewer";
 import Container from "@mui/material/Container";
 
 // TODO: Fix initial sizing of the threejs component on first render
@@ -20,19 +20,18 @@ const SpeckleSceneWithHooks = ({ token, url }) => {
   }, []);
 
   useEffect(() => {
-    async function getModel(viewer, speckleURL, token) {
-      await viewer.loadObject(speckleURL, token);
+    async function initializeViewer(viewer) {
+      await viewer.init();
     }
 
-    const v = new Viewer(mount.current);
-    getModel(v, url, token);
-    console.log("getting Model");
+    async function loadModel(viewer, url, token) {
+      await viewer.loadObjectAsync(url, token, undefined, 1);
+    }
 
-    return () => {
-      while (mount.current.hasChildNodes()) {
-        mount.current.removeChild(mount.current.firstChild);
-      }
-    };
+    const params = DefaultViewerParams;
+    const v = new Viewer(mount.current, params);
+    initializeViewer(v);
+    loadModel(v, url, token);
   }, []);
 
   return (
